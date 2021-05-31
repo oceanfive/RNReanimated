@@ -1,42 +1,92 @@
-#
-# Be sure to run `pod lib lint RNReanimated.podspec' to ensure this is a
-# valid spec before submitting.
-#
-# Any lines starting with a # are optional, but their use is encouraged
-# To learn more about a Podspec see https://guides.cocoapods.org/syntax/podspec.html
-#
+
+version = '2.1.0'
+source = { :git => 'https://github.com/software-mansion/react-native-reanimated.git', :tag => "#{version}"}
+
+reactVersion = '0.63.4'
+rnVersion = reactVersion.split('.')[1]
+
+folly_prefix = ""
+if rnVersion.to_i >= 64
+  folly_prefix = "RCT-"
+end
+
+
+folly_flags = '-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1 -DRNVERSION=' + rnVersion
+folly_compiler_flags = folly_flags + ' ' + '-Wno-comma -Wno-shorten-64-to-32'
+folly_version = '2020.01.13.00'
+boost_compiler_flags = '-Wno-documentation'
 
 Pod::Spec.new do |s|
-  s.name             = 'RNReanimated'
-  s.version          = '0.1.0'
-  s.summary          = 'A short description of RNReanimated.'
+  s.name         = "RNReanimated"
+  s.version      = version
+  s.summary      = "More powerful alternative to Animated library for React Native."
+  s.description  = <<-DESC
+                  RNReanimated
+                   DESC
+  s.homepage     = "https://github.com/software-mansion/react-native-reanimated"
+  s.license      = "MIT"
+  # s.license    = { :type => "MIT", :file => "FILE_LICENSE" }
+  s.author       = { "author" => "author@domain.cn" }
+  s.platforms    = { :ios => "9.0", :tvos => "9.0" }
+  s.source       = source
+  s.static_framework       = true
 
-# This description is used to generate tags and improve search results.
-#   * Think: What does it do? Why did you write it? What is the focus?
-#   * Try to keep it short, snappy and to the point.
-#   * Write the description between the DESC delimiters below.
-#   * Finally, don't worry about the indent, CocoaPods strips it!
+  s.source_files = [
+    "ios/**/*.{mm,h,m}",
+    "Common/cpp/**/*.cpp",
+    "Common/cpp/headers/**/*.h"
+  ]
 
-  s.description      = <<-DESC
-TODO: Add long description of the pod here.
-                       DESC
+  s.preserve_paths = [
+    "Common/cpp/hidden_headers/**"
+  ]
 
-  s.homepage         = 'https://github.com/oceanfive/RNReanimated'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
-  s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'oceanfive' => '849638313@qq.com' }
-  s.source           = { :git => 'https://github.com/oceanfive/RNReanimated.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.pod_target_xcconfig    = {
+    "USE_HEADERMAP" => "YES",
+    "HEADER_SEARCH_PATHS" => "\"$(PODS_TARGET_SRCROOT)/ReactCommon\" \"$(PODS_TARGET_SRCROOT)\" \"$(PODS_ROOT)/#{folly_prefix}Folly\" \"$(PODS_ROOT)/boost-for-react-native\" \"$(PODS_ROOT)/DoubleConversion\" \"$(PODS_ROOT)/Headers/Private/React-Core\" "
+  }
+  s.compiler_flags = folly_compiler_flags + ' ' + boost_compiler_flags
+  s.xcconfig               = {
+    "CLANG_CXX_LANGUAGE_STANDARD" => "c++14",
+    "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/boost-for-react-native\" \"$(PODS_ROOT)/glog\" \"$(PODS_ROOT)/#{folly_prefix}Folly\"",
+                               "OTHER_CFLAGS" => "$(inherited)" + " " + folly_flags  }
 
-  s.ios.deployment_target = '9.0'
+  s.requires_arc = true
 
-  s.source_files = 'RNReanimated/Classes/**/*'
-  
-  # s.resource_bundles = {
-  #   'RNReanimated' => ['RNReanimated/Assets/*.png']
-  # }
+  s.dependency "React"
+  s.dependency 'FBLazyVector'
+  s.dependency 'FBReactNativeSpec'
+  s.dependency 'RCTRequired'
+  s.dependency 'RCTTypeSafety'
+  s.dependency 'React-Core'
+  s.dependency 'React-CoreModules'
+  s.dependency 'React-Core/DevSupport'
+  s.dependency 'React-RCTActionSheet'
+  s.dependency 'React-RCTNetwork'
+  s.dependency 'React-RCTAnimation'
+  s.dependency 'React-RCTLinking'
+  s.dependency 'React-RCTBlob'
+  s.dependency 'React-RCTSettings'
+  s.dependency 'React-RCTText'
+  s.dependency 'React-RCTVibration'
+  s.dependency 'React-RCTImage'
+  s.dependency 'React-Core/RCTWebSocket'
+  s.dependency 'React-cxxreact'
+  s.dependency 'React-jsi'
+  s.dependency 'React-jsiexecutor'
+  s.dependency 'React-jsinspector'
+  s.dependency 'ReactCommon/turbomodule/core'
+  s.dependency 'Yoga'
+  s.dependency 'DoubleConversion'
+  s.dependency 'glog'
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
-  # s.dependency 'AFNetworking', '~> 2.3'
+  if reactVersion.match(/^0.62/)
+    s.dependency 'ReactCommon/callinvoker'
+  else
+    s.dependency 'React-callinvoker'
+  end
+
+  s.dependency "#{folly_prefix}Folly"
+
 end
+
